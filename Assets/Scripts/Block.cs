@@ -45,7 +45,7 @@ public class Block : MonoBehaviour {
 	void Awake () {
 		// get size of Block
 		size = BlockStructure.Length;
-
+		Debug.Log("the size is: " + size);
 		// to do: 
 		// a lot of error checking
 
@@ -56,7 +56,6 @@ public class Block : MonoBehaviour {
 		// generate bitField for Collisions
 		// this time, unity is used only for visual representation
 		blockMatrix = new bool[size, size];
-
 		// Instantiate Block from the Blockstructure
 		for (int y = 0; y < size; y++) {
 			for (int x = 0; x < size; x++) {
@@ -156,11 +155,11 @@ public class Block : MonoBehaviour {
 		}
 
 		if (Input.GetKeyUp (KeyCode.Keypad1)) {
-			rotateBlockRight();
+			rotateBlockLeft();
 		}
 
-		if (Input.GetKeyUp (KeyCode.Keypad4)) {
-			rotateBlockLeft();
+		if (Input.GetKeyUp (KeyCode.Keypad3)) {
+			rotateBlockRight();
 		}
 		if (Input.GetKeyUp (KeyCode.Keypad7)) {
 			//rotateBlockForward();

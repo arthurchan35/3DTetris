@@ -53,11 +53,7 @@ public class Gamemanager : MonoBehaviour {
 	private float nativeHeight = 768;
 
 	// finite state machine for game states
-	enum GameStates {
-		game,
-		gameOver,
-		gamePaused,
-	};
+	enum GameStates {game, gameOver, gamePaused,};
 
 	GameStates gameState;
 
