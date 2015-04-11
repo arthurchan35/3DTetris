@@ -19,13 +19,15 @@ public class Gamemanager : MonoBehaviour {
 	// Grid boundaries
 	public int _fieldHeight = 13;
 	public int _fieldWidth = 10;
+	public int _fieldLength = 10;
 	// maximal Size of a block
 	// --> I-Block --> 4
 	public int maxBlockSize = 4;
-	private bool[,] field;
+	private bool[,,] field;
 	//virtual grid with thick walls
 	private int fieldWidth;
 	private int fieldHeight;
+	private int fieldLength;
 
 	// sneak preview to tetrominoe falling next
 	private int nextBlock;
@@ -42,6 +44,10 @@ public class Gamemanager : MonoBehaviour {
 
 	public int getFieldWidth() {
 		return fieldWidth;
+	}
+
+	public int getFieldLength() {
+		return fieldLength;
 	}
 
 	// I tried to make the GUI resolution independent
@@ -85,22 +91,32 @@ public class Gamemanager : MonoBehaviour {
 		// generate Bitfield for Collisions
 		// walls are 4 bricks thick to avoid blocks penetrate the wall
 		fieldWidth = _fieldWidth + maxBlockSize * 2;
+		fieldLength = _fieldLength + maxBlockSize * 2;
 		fieldHeight = _fieldHeight + maxBlockSize;
-		field = new bool[fieldWidth, fieldHeight];
+		field = new bool[fieldWidth, fieldHeight, fieldLength];
 
 		// thick walls...
 		for (int y = 0; y < fieldHeight; y++) {
-			for (int x = 0; x < maxBlockSize;x++) {
-				// ... on the left...
-				field[x,y] = true;
-				// ... and on the right
-				field[fieldWidth - 1 - x,y] = true;
+			for (int z = 0; z < fieldLength; z++) {
+				for (int x = 0; x < maxBlockSize; x++) {
+					field[x, y, z] = true;
+					field[fieldWidth - 1 - x, y, z] = true;
+				}
+			}
+			for (int x = 0; x < fieldWidth; x++) {
+				for (int z = 0; z < maxBlockSize; z++) {
+					field[x, y, z] = true;
+					field[x, y, fieldLength - 1 - z] = true;
+				}
 			}
 		}
 
+
 		// ground control :-)
-		for (int x = 0; x < fieldWidth; x++) {
-			field[x,0] = true;
+		for (int z = 0; z < fieldLength; z++) {
+			for (int x = 0; x < fieldWidth; x++) {
+				field [x, 0, z] = true;
+			}
 		}
 
 		//let's get to it: 
@@ -166,7 +182,7 @@ public class Gamemanager : MonoBehaviour {
 	// why the same function?
 	// we destroy the parent block and his script. This way, we give control to a function in this script
 	// before destroying the block. So this routine can run even if the block is destroyed
-	public void _setBlock(bool[,] blockMatrix, int size, int xPos, int yPos,bool dropped) {
+	public void _setBlock(bool[,] blockMatrix, int size, int xPos, int yPos, int zPos, bool dropped) {
 		// play the drop sound
 		GetComponent<AudioSource>().PlayOneShot (drop);
 		//check the blockMatrix
@@ -175,8 +191,8 @@ public class Gamemanager : MonoBehaviour {
 				// do we have a brick set?
 				if (blockMatrix[x,y]) {
 					// Instantiate a new cube at this position
-					Instantiate(cube, new Vector3(xPos +x, yPos-y,0), Quaternion.identity);
-					field[xPos+x,yPos-y] = true;
+					Instantiate(cube, new Vector3(xPos +x, yPos-y, zPos), Quaternion.identity);
+					field[xPos+x,yPos-y, zPos] = true;
 				}
 			}
 		}
@@ -184,7 +200,7 @@ public class Gamemanager : MonoBehaviour {
 		scoreBlock(dropped);
 
 		// complete rows can olny be in the range of the dropped block
-		checkRows (yPos - size, size);
+		//checkRows (yPos - size, size);
 		// go ahead, make my day... uhhh... game
 		if (gameState == GameStates.game)
 			spawnBlock();
@@ -195,16 +211,17 @@ public class Gamemanager : MonoBehaviour {
 	// The Container-Block must be destroyed when reaching the ground or touching another
 	// brick from the top. Why not just use the current cubes for the game?
 	//  We have to test for x/y coordinates which may have be corrupted by block rotation :-/
-	public void setBlock(bool[,] blockMatrix, int size, int xPos, int yPos,bool dropped) {
-		_setBlock (blockMatrix, size, xPos, yPos, dropped);
+	public void setBlock(bool[,] blockMatrix, int size, int xPos, int yPos, int zPos, bool dropped) {
+		_setBlock (blockMatrix, size, xPos, yPos, zPos, dropped);
 	}
 
 
 	// check the collision matrix at a certain position
-	public bool checkBlock(bool[,] blockMatrix, int size, int xPos, int yPos) {
+	public bool checkBlock(bool[,] blockMatrix, int size, int xPos, int yPos, int zPos) {
+		Debug.Log ("zPos is : " + zPos);
 		for (int y = size-1; y>=0; y--) {
 			for (int x = 0; x < size; x++) {
-				if (blockMatrix[x,y] && field[xPos+x,yPos-y]) {
+				if (blockMatrix[x,y] && field[xPos+x,yPos-y, zPos]) {
 					return true;
 				}
 			}
@@ -224,7 +241,7 @@ public class Gamemanager : MonoBehaviour {
 			// take the thick walls into account
 			for (x = maxBlockSize; x < fieldWidth-maxBlockSize;x++) {
 				// empty spaces? then leave the current row alone
-				if (!field[x,y])
+				if (!field[x,y, 5])
 					break;
 			}
 			// complete row is filled ?
@@ -297,12 +314,12 @@ public class Gamemanager : MonoBehaviour {
 		for (int y = row; y < fieldHeight -1; y++) {
 			// take the thick walls into account
 			for (int x = maxBlockSize; x < fieldWidth - maxBlockSize;x++) {
-				field[x,y] = field[x,y+1];
+				field[x,y, 5] = field[x,y+1, 5];
 			}
 		}
 		// make sure top line is cleared 
 		for (int x = maxBlockSize; x < fieldWidth - maxBlockSize;x++) {
-			field[x,fieldHeight-1] = false;
+			field[x,fieldHeight-1, 5] = false;
 		}
 		// now for the gameObjects: destroy cubes in the deleted row
 		GameObject[] cubes = GameObject.FindGameObjectsWithTag ("Cube");

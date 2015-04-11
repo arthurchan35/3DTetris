@@ -24,6 +24,7 @@ public class Block : MonoBehaviour {
 	
 	private int yPosition;
 	private int xPosition;
+	private int zPosition;
 
 	public float fallingInterval = 1f;
 	float movingInterval = 0.1f;
@@ -76,6 +77,8 @@ public class Block : MonoBehaviour {
 		xPosition = (int)(position.x - halfSizeFloat);
 		yPosition = Gamemanager.thisOne.getFieldHeight () - 1;
 		position.y = yPosition - halfSizeFloat; 
+		position.z = Gamemanager.thisOne.getFieldLength () / 2 + (size % 2 == 0 ? 0.0f : 0.5f);
+		zPosition = (int)(position.z - halfSizeFloat);
 		transform.position = position;
 
 		// don't freeze block
@@ -85,7 +88,7 @@ public class Block : MonoBehaviour {
 
 		// we just spawned a new Tetromino
 		// have we reached the top? Is the game already over?
-		if (Gamemanager.thisOne.checkBlock (blockMatrix, size, xPosition, yPosition)) {
+		if (Gamemanager.thisOne.checkBlock (blockMatrix, size, xPosition, yPosition, zPosition)) {
 			// this game is over
 			Gamemanager.thisOne.gameOver();
 			// and out
@@ -121,9 +124,9 @@ public class Block : MonoBehaviour {
 			// let block fall (virtually)
 			yPosition--;
 			// is there a collision at the new position?
-			if (Gamemanager.thisOne.checkBlock(blockMatrix,size, xPosition, yPosition)) {
+			if (Gamemanager.thisOne.checkBlock(blockMatrix,size, xPosition, yPosition, zPosition)) {
 				// Then set the block at actual position...
-				Gamemanager.thisOne.setBlock(blockMatrix,size, xPosition, yPosition+1,dropped);
+				Gamemanager.thisOne.setBlock(blockMatrix,size, xPosition, yPosition+1, zPosition,dropped);
 				// and destroy the gameObject
 				Destroy(gameObject);
 				// I almost forgot: leave the loop
@@ -148,10 +151,10 @@ public class Block : MonoBehaviour {
 			moveAlongX(1);
 		}
 		if (Input.GetKeyUp (KeyCode.Keypad8)) {
-			//moveAlongZ();
+			moveAlongZ(1);
 		}
 		if (Input.GetKeyUp (KeyCode.Keypad2)) {
-			//moveAlongZ();
+			moveAlongZ(-1);
 		}
 
 		if (Input.GetKeyUp (KeyCode.Keypad1)) {
@@ -177,7 +180,7 @@ public class Block : MonoBehaviour {
 
 	// move the block physically
 	void moveAlongX(int direction) {
-		if (!Gamemanager.thisOne.checkBlock(blockMatrix, size,xPosition+direction, yPosition)) {
+		if (!Gamemanager.thisOne.checkBlock(blockMatrix, size,xPosition+direction, yPosition, zPosition)) {
 			GetComponent<AudioSource>().PlayOneShot(swoosh);
 			xPosition += direction;
 			Vector3 position = transform.position;
@@ -187,7 +190,13 @@ public class Block : MonoBehaviour {
 	}
 
 	void moveAlongZ(int direction) {
-	
+		if (!Gamemanager.thisOne.checkBlock (blockMatrix, size, xPosition + direction, yPosition, zPosition)) {
+			GetComponent<AudioSource>().PlayOneShot(swoosh);
+			zPosition += direction;
+			Vector3 position = transform.position;
+			position.z += direction;
+			transform.position = position;
+		}
 	}
 	// rotate the block right, 90°
 	void rotateBlockRight() {
@@ -201,7 +210,7 @@ public class Block : MonoBehaviour {
 		}
 		
 		// check if rotated block overlaps something
-		if (!Gamemanager.thisOne.checkBlock (tempMatrix, size, xPosition, yPosition)) {
+		if (!Gamemanager.thisOne.checkBlock (tempMatrix, size, xPosition, yPosition, zPosition)) {
 			GetComponent<AudioSource>().PlayOneShot(swoosh);
 			// if not, copy the temp matrix to the original blockmatrix
 			System.Array.Copy(tempMatrix, blockMatrix, size*size);
@@ -222,7 +231,7 @@ public class Block : MonoBehaviour {
 		}
 		
 		// check if rotated block overlaps something
-		if (!Gamemanager.thisOne.checkBlock (tempMatrix, size, xPosition, yPosition)) {
+		if (!Gamemanager.thisOne.checkBlock (tempMatrix, size, xPosition, yPosition, zPosition)) {
 			GetComponent<AudioSource>().PlayOneShot(swoosh);
 			// if not, copy the temp matrix to the original blockmatrix
 			System.Array.Copy(tempMatrix, blockMatrix, size*size);
