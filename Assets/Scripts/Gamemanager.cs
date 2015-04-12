@@ -188,11 +188,11 @@ public class Gamemanager : MonoBehaviour {
 		//check the blockMatrix
 		for (int y = 0; y < size; y++) {
 			for (int x = 0; x < size; x++) {
-				// do we have a brick set?
-				if (blockMatrix[x,y]) {
-					// Instantiate a new cube at this position
-					Instantiate(cube, new Vector3(xPos +x, yPos-y, zPos), Quaternion.identity);
-					field[xPos+x,yPos-y, zPos] = true;
+				for (int z = 0; z < size; z++) {
+					if (blockMatrix[x,y]) {
+						Instantiate(cube, new Vector3(xPos + x, yPos - y, zPos + z), Quaternion.identity);
+						field[xPos + x, yPos - y, zPos + z] = true;
+					}
 				}
 			}
 		}
@@ -221,8 +221,10 @@ public class Gamemanager : MonoBehaviour {
 		Debug.Log ("zPos is : " + zPos);
 		for (int y = size-1; y>=0; y--) {
 			for (int x = 0; x < size; x++) {
-				if (blockMatrix[x,y] && field[xPos+x,yPos-y, zPos]) {
-					return true;
+				for (int z = 0; z < size; z++) {
+					if (blockMatrix[x,y] && field[xPos+x,yPos-y, zPos]) {
+						return true;
+					}
 				}
 			}
 		}
