@@ -131,7 +131,8 @@ public class Gamemanager : MonoBehaviour {
 		// is this the first block ever?
 		if (nextBlock == -1) {
 			// instantiate a new block...
-			block = (GameObject)Instantiate (blocks [Random.Range (0, blocks.Length - 1)]);
+			block = (GameObject)Instantiate (blocks [0]);
+			//block = (GameObject)Instantiate (blocks [Random.Range (0, blocks.Length - 1)]);
 		}
 		else {
 			// instantiate the "nextBlock"-Block
@@ -141,7 +142,8 @@ public class Gamemanager : MonoBehaviour {
 		// ...and set the falling speed according to the level
 		block.GetComponent<Block>().setFallingInterval(1f-0.025f*level);
 		// generate the next block
-		nextBlock = Random.Range (0, blocks.Length - 1);
+		nextBlock = 0;
+		//nextBlock = Random.Range (0, blocks.Length - 1);
 		if (goNextBlock != null)
 			Destroy(goNextBlock);
 		goNextBlock = (GameObject)Instantiate (blocks [nextBlock]);
@@ -182,14 +184,14 @@ public class Gamemanager : MonoBehaviour {
 	// why the same function?
 	// we destroy the parent block and his script. This way, we give control to a function in this script
 	// before destroying the block. So this routine can run even if the block is destroyed
-	public void _setBlock(bool[,] blockMatrix, int size, int xPos, int yPos, int zPos, bool dropped) {
+	public void _setBlock(bool[,,] blockMatrix, int size, int xPos, int yPos, int zPos, bool dropped) {
 		// play the drop sound
 		GetComponent<AudioSource>().PlayOneShot (drop);
 		//check the blockMatrix
 		for (int y = 0; y < size; y++) {
 			for (int x = 0; x < size; x++) {
 				for (int z = 0; z < size; z++) {
-					if (blockMatrix[x,y]) {
+					if (blockMatrix[x,y,z]) {
 						Instantiate(cube, new Vector3(xPos + x, yPos - y, zPos + z), Quaternion.identity);
 						field[xPos + x, yPos - y, zPos + z] = true;
 					}
@@ -200,7 +202,7 @@ public class Gamemanager : MonoBehaviour {
 		scoreBlock(dropped);
 
 		// complete rows can olny be in the range of the dropped block
-		//checkRows (yPos - size, size);
+		checkRows (yPos - size, size);
 		// go ahead, make my day... uhhh... game
 		if (gameState == GameStates.game)
 			spawnBlock();
@@ -211,18 +213,17 @@ public class Gamemanager : MonoBehaviour {
 	// The Container-Block must be destroyed when reaching the ground or touching another
 	// brick from the top. Why not just use the current cubes for the game?
 	//  We have to test for x/y coordinates which may have be corrupted by block rotation :-/
-	public void setBlock(bool[,] blockMatrix, int size, int xPos, int yPos, int zPos, bool dropped) {
+	public void setBlock(bool[,,] blockMatrix, int size, int xPos, int yPos, int zPos, bool dropped) {
 		_setBlock (blockMatrix, size, xPos, yPos, zPos, dropped);
 	}
 
 
 	// check the collision matrix at a certain position
-	public bool checkBlock(bool[,] blockMatrix, int size, int xPos, int yPos, int zPos) {
-		Debug.Log ("zPos is : " + zPos);
+	public bool checkBlock(bool[,,] blockMatrix, int size, int xPos, int yPos, int zPos) {
 		for (int y = size-1; y>=0; y--) {
 			for (int x = 0; x < size; x++) {
 				for (int z = 0; z < size; z++) {
-					if (blockMatrix[x,y] && field[xPos+x,yPos-y, zPos]) {
+					if (blockMatrix[x,y,z] && field[xPos +x,yPos - y, zPos + z]) {
 						return true;
 					}
 				}
@@ -234,20 +235,22 @@ public class Gamemanager : MonoBehaviour {
 
 
 	void checkRows(int yStart, int size) {
-		int y,x;
+		int y = yStart, x = maxBlockSize, z = maxBlockSize;
 		int rowsCollapsed = 0;
 		// make sure to start above the grid (floor)
 		if (yStart < 1)
 			yStart = 1;
 		for (y = yStart; y < yStart+size; y++) {
 			// take the thick walls into account
-			for (x = maxBlockSize; x < fieldWidth-maxBlockSize;x++) {
+			for (x = maxBlockSize; x < fieldWidth-maxBlockSize; x++) {
+				for (z = maxBlockSize; z < fieldLength - maxBlockSize; z++) {
 				// empty spaces? then leave the current row alone
-				if (!field[x,y, 5])
-					break;
+					if (!field[x, y, z]) break;
+				}
+				if (!field[x, y, z]) break;
 			}
 			// complete row is filled ?
-			if (x== fieldWidth - maxBlockSize) {
+			if (x == fieldWidth - maxBlockSize && z == fieldLength - maxBlockSize) {
 				//remove the row
 				if (collapseRow(y))
 					rowsCollapsed++;
@@ -315,13 +318,15 @@ public class Gamemanager : MonoBehaviour {
 		// Move rows down one in the array
 		for (int y = row; y < fieldHeight -1; y++) {
 			// take the thick walls into account
-			for (int x = maxBlockSize; x < fieldWidth - maxBlockSize;x++) {
-				field[x,y, 5] = field[x,y+1, 5];
+			for (int x = maxBlockSize; x < fieldWidth - maxBlockSize; x++) {
+				for (int z = maxBlockSize; z < fieldLength - maxBlockSize; z++)
+					field[x, y, z] = field[x, y+1, z];
 			}
 		}
 		// make sure top line is cleared 
-		for (int x = maxBlockSize; x < fieldWidth - maxBlockSize;x++) {
-			field[x,fieldHeight-1, 5] = false;
+		for (int x = maxBlockSize; x < fieldWidth - maxBlockSize; x++) {
+			for (int z = maxBlockSize; z < fieldLength - maxBlockSize; z++)
+			field[x,fieldHeight-1, z] = false;
 		}
 		// now for the gameObjects: destroy cubes in the deleted row
 		GameObject[] cubes = GameObject.FindGameObjectsWithTag ("Cube");

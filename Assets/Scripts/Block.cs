@@ -17,7 +17,7 @@ public class Block : MonoBehaviour {
 	public AudioClip swoosh;
 	
 	private GameObject block;
-	private bool [,] blockMatrix;
+	private bool [,,] blockMatrix;
 	private int size;
 	private int halfSize;
 	private float halfSizeFloat;
@@ -56,15 +56,15 @@ public class Block : MonoBehaviour {
 
 		// generate bitField for Collisions
 		// this time, unity is used only for visual representation
-		blockMatrix = new bool[size, size];
+		blockMatrix = new bool[size, size, size];
 		// Instantiate Block from the Blockstructure
 		for (int y = 0; y < size; y++) {
 			for (int x = 0; x < size; x++) {
 				if (BlockStructure[y][x].ToString() == "1")
 				{
-					blockMatrix[x,y] = true;
+					blockMatrix[x,y,0] = true;
 					// if Block Bit is set, Instantiate Block 
-					block  = Instantiate(cubus,new Vector3(x-halfSizeFloat,halfSizeFloat-y,0), Quaternion.identity) as GameObject;
+					block  = Instantiate(cubus,new Vector3(x-halfSizeFloat,halfSizeFloat-y,-halfSizeFloat), Quaternion.identity) as GameObject;
 					// give color to the block
 					block.transform.GetComponentInChildren<MeshRenderer>().GetComponent<Renderer>().material = blockMaterial;
 					// bind block to parent for rotation and movement 
@@ -165,10 +165,10 @@ public class Block : MonoBehaviour {
 			rotateBlockRight();
 		}
 		if (Input.GetKeyUp (KeyCode.Keypad7)) {
-			//rotateBlockForward();
+			rotateBlockForward();
 		}
 		if (Input.GetKeyUp (KeyCode.Keypad9)) {
-			//rotateBlockBackward();
+			rotateBlockBackward();
 		}
 
 		// drop the block
@@ -190,7 +190,7 @@ public class Block : MonoBehaviour {
 	}
 
 	void moveAlongZ(int direction) {
-		if (!Gamemanager.thisOne.checkBlock (blockMatrix, size, xPosition + direction, yPosition, zPosition)) {
+		if (!Gamemanager.thisOne.checkBlock (blockMatrix, size, xPosition, yPosition, zPosition + direction)) {
 			GetComponent<AudioSource>().PlayOneShot(swoosh);
 			zPosition += direction;
 			Vector3 position = transform.position;
@@ -201,32 +201,33 @@ public class Block : MonoBehaviour {
 	// rotate the block right, 90°
 	void rotateBlockRight() {
 		// generate a temporary matrix to store the rotated block
-		bool[,] tempMatrix = new bool[size, size];
-		for (int y = 0; y < size; y++) {
-			for (int x = 0; x < size;x++) {
-				// copy the values and rotate
-				tempMatrix[y,x] = blockMatrix[x,(size-1)-y];
+		bool[,,] tempMatrix = new bool[size, size,size];
+		for (int z = 0; z < size; z++) {
+			for (int y = 0; y < size; y++) {
+				for (int x = 0; x < size; x++) {
+					tempMatrix [y, x, z] = blockMatrix [x, (size - 1) - y, z];
+				}
 			}
 		}
-		
 		// check if rotated block overlaps something
 		if (!Gamemanager.thisOne.checkBlock (tempMatrix, size, xPosition, yPosition, zPosition)) {
 			GetComponent<AudioSource>().PlayOneShot(swoosh);
 			// if not, copy the temp matrix to the original blockmatrix
-			System.Array.Copy(tempMatrix, blockMatrix, size*size);
+			System.Array.Copy(tempMatrix, blockMatrix, size * size * size);
 			// and don't forget: rotate the block on the screen
-			transform.Rotate(Vector3.forward*-90.0f);
+			transform.Rotate(Vector3.back*+90.0f, Space.World);
 		}
 	}
 
 	// rotate the block left, 90°
 	void rotateBlockLeft() {
 		// generate a temporary matrix to store the rotated block
-		bool[,] tempMatrix = new bool[size, size];
-		for (int y = 0; y < size; y++) {
-			for (int x = 0; x < size;x++) {
-				// copy the values and rotate
-				tempMatrix[(size-1)-y,(size-1)-x] = blockMatrix[x,(size-1)-y];
+		bool[,,] tempMatrix = new bool[size, size, size];
+		for ( int z = 0; z < size; z++){
+			for (int y = 0; y < size; y++) {
+				for (int x = 0; x < size;x++) {
+					tempMatrix[(size - 1) - y, (size - 1) - x, z] = blockMatrix[x,(size-1)-y, z];
+				}
 			}
 		}
 		
@@ -234,11 +235,52 @@ public class Block : MonoBehaviour {
 		if (!Gamemanager.thisOne.checkBlock (tempMatrix, size, xPosition, yPosition, zPosition)) {
 			GetComponent<AudioSource>().PlayOneShot(swoosh);
 			// if not, copy the temp matrix to the original blockmatrix
-			System.Array.Copy(tempMatrix, blockMatrix, size*size);
+			System.Array.Copy(tempMatrix, blockMatrix, size * size * size);
 			// and don't forget: rotate the block on the screen
-			transform.Rotate(Vector3.forward*+90.0f);
+			transform.Rotate(Vector3.forward*+90.0f, Space.World);
 		}
 	}
+
+	void rotateBlockForward() {
+		// generate a temporary matrix to store the rotated block
+		bool[,,] tempMatrix = new bool[size, size, size];
+		for (int x = 0; x < size; x++) {
+			for (int y = 0; y < size; y++) {
+				for ( int z = 0; z < size; z++)
+					tempMatrix[x ,(size-1)-z, (size-1)-y] = blockMatrix[x,(size-1)-y, z];
+			}
+		}
+		
+		// check if rotated block overlaps something
+		if (!Gamemanager.thisOne.checkBlock (tempMatrix, size, xPosition, yPosition, zPosition)) {
+			GetComponent<AudioSource>().PlayOneShot(swoosh);
+			// if not, copy the temp matrix to the original blockmatrix
+			System.Array.Copy(tempMatrix, blockMatrix, size * size * size);
+			// and don't forget: rotate the block on the screen
+			transform.Rotate(Vector3.left*+90.0f, Space.World);
+		}
+	}
+
+	void rotateBlockBackward() {
+		// generate a temporary matrix to store the rotated block
+		bool[,,] tempMatrix = new bool[size, size, size];
+		for (int x = 0; x < size; x++) {
+			for (int y = 0; y < size; y++) {
+				for ( int z = 0; z < size; z++)
+					tempMatrix[x ,z, y] = blockMatrix[x,(size-1)-y, z];
+			}
+		}
+		
+		// check if rotated block overlaps something
+		if (!Gamemanager.thisOne.checkBlock (tempMatrix, size, xPosition, yPosition, zPosition)) {
+			GetComponent<AudioSource>().PlayOneShot(swoosh);
+			// if not, copy the temp matrix to the original blockmatrix
+			System.Array.Copy(tempMatrix, blockMatrix, size * size * size);
+			// and don't forget: rotate the block on the screen
+			transform.Rotate(Vector3.right*+90.0f, Space.World);
+			//transform.Rotate(Vector3.forward*+90.0f);
+		}
+	} 	
 
 	public void setFallingInterval(float interval){
 		fallingInterval = interval;
