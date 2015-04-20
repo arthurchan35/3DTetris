@@ -33,6 +33,9 @@ public class Gamemanager : MonoBehaviour {
 	private int nextBlock;
 	private GameObject goNextBlock;
 
+	public int diffculty;
+
+	private GameObject ms;
 	// some statistics
 	private int level;
 	private int score;
@@ -55,8 +58,8 @@ public class Gamemanager : MonoBehaviour {
 	// OnGUI resizes the GUI-elements
 	// These values have to be float,
 	// else division in method OnGUI will return null (rx, ry)
-	private float nativeWidth = 1024;
-	private float nativeHeight = 768;
+	private float nativeWidth = 1280;
+	private float nativeHeight = 720;
 
 	// finite state machine for game states
 	enum GameStates {game, gameOver, gamePaused,};
@@ -65,6 +68,12 @@ public class Gamemanager : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+		ms = GameObject.Find ("Menu");
+		if (ms == null)
+			diffculty = 2;
+		else
+			diffculty = ms.GetComponent<MenuScript>().getDiff();
+		Destroy (ms);
 		// create a singleton of this instance
 		if (!thisOne) {
 			thisOne = this;
@@ -127,12 +136,17 @@ public class Gamemanager : MonoBehaviour {
 
 	// create a new random block at the top of the grid
 	void spawnBlock() {
+
 		GameObject block;
 		// is this the first block ever?
 		if (nextBlock == -1) {
 			// instantiate a new block...
-			block = (GameObject)Instantiate (blocks [0]);
-			//block = (GameObject)Instantiate (blocks [Random.Range (0, blocks.Length - 1)]);
+			if (diffculty == 1)
+				block = (GameObject)Instantiate (blocks [0]);
+			else if (diffculty  == 2)
+				block = (GameObject)Instantiate (blocks [Random.Range (0, 2)]);
+			else
+			block = (GameObject)Instantiate (blocks [Random.Range (0, blocks.Length - 1)]);
 		}
 		else {
 			// instantiate the "nextBlock"-Block
@@ -142,8 +156,13 @@ public class Gamemanager : MonoBehaviour {
 		// ...and set the falling speed according to the level
 		block.GetComponent<Block>().setFallingInterval(1f-0.025f*level);
 		// generate the next block
-		nextBlock = 0;
-		//nextBlock = Random.Range (0, blocks.Length - 1);
+
+		if (diffculty == 1)
+			nextBlock = 0;
+		else if (diffculty  == 2)
+			nextBlock = Random.Range (0, 2);
+		else
+			nextBlock = Random.Range (0, blocks.Length - 1);
 		if (goNextBlock != null)
 			Destroy(goNextBlock);
 		goNextBlock = (GameObject)Instantiate (blocks [nextBlock]);
@@ -162,6 +181,9 @@ public class Gamemanager : MonoBehaviour {
 				gameState = GameStates.gamePaused;
 				Time.timeScale = 0f;
 			}
+			if (Input.GetKeyUp(KeyCode.R)){
+				Application.LoadLevel("menu2");
+			}
 			break;
 		case GameStates.gamePaused:
 			// if the game is paused and "P" is pressed,
@@ -174,9 +196,10 @@ public class Gamemanager : MonoBehaviour {
 		case GameStates.gameOver:
 			// if the game is over,
 			// go back to the menu
-			if (Input.GetKeyUp(KeyCode.Space)){
-				Application.LoadLevel("menu2");
-			}
+			Application.LoadLevel("updatehighscore");
+			//if (Input.GetKeyUp(KeyCode.Space)){
+			//	Application.LoadLevel("menu2");
+			//}
 				break;
 		}
 	}
@@ -279,11 +302,11 @@ public class Gamemanager : MonoBehaviour {
 	void scoreBlock(bool dropped){
 		if (dropped) {
 			// each cube scores twice when hard dropped
-			score += 2*4;
+			score += 2;
 		}
 		else {
 			// each cube scores once when soft dropped
-			score += 1*4;
+			score += 1;
 		}
 	}
 
@@ -395,5 +418,13 @@ public class Gamemanager : MonoBehaviour {
 			myPause2Style.font = myFont;
 			GUI.Label(new Rect(60,420,1024,300), "Press P To Continue", myPause2Style);
 		}
+	}
+
+	public int getScore() {
+		return score;
+	}
+
+	void Awake() {
+		DontDestroyOnLoad(this);
 	}
 }

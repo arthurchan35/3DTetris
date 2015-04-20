@@ -6,25 +6,34 @@ public class MoveControl : MonoBehaviour {
 	GameObject camObj;
 	float leftRight;
 	float forwardBackward;
+	float verticalSpeed;
+	Vector3 move;
 	// Use this for initialization
 	void Start () {
 		camObj = GameObject.Find("Main Camera");
 		leftRight = 0;
 		forwardBackward = 0;
+		verticalSpeed = 0;
+		move = Vector3.zero;
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		float y = camObj.GetComponent<CamControl> ().getYRot ();
-		float x = camObj.GetComponent<CamControl> ().getXRot ();
-		transform.rotation = Quaternion.Euler (x, y, 0);
-
+		if (camObj != null) {
+			float y = camObj.GetComponent<CamControl> ().getYRot ();
+			float x = camObj.GetComponent<CamControl> ().getXRot ();
+			transform.rotation = Quaternion.Euler (0, y, 0);
+		}
 		CharacterController cc = GetComponent<CharacterController> ();
 		leftRight = Input.GetAxis("Horizontal");
 		forwardBackward = Input.GetAxis("Vertical");
-
-		Vector3 move = new Vector3 (leftRight, 0, forwardBackward);
+		verticalSpeed += Physics.gravity.y * Time.deltaTime;
+		if (cc.isGrounded) {
+			if(Input.GetKeyDown(KeyCode.Space))
+				verticalSpeed = 5;
+		}
+		move = new Vector3 (leftRight * 5, verticalSpeed, forwardBackward * 5);
 		move = transform.rotation * move;
-		cc.Move(move);
+		cc.Move(move * Time.deltaTime);
 	}
 }

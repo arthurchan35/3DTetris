@@ -17,9 +17,10 @@ public class MenuScript : MonoBehaviour {
 	// OnGUI resizes the GUI-elements
 	// These values have to be float,
 	// else division in method OnGUI will return null (rx, ry)
-	private float nativeWidth = 1024;
-	private float nativeHeight = 768;
+	private float nativeWidth = 1280;
+	private float nativeHeight = 720;
 
+	public int difficulty;
 	// Reference to the rectangles which can be clicked on the screen
 	private Rect play;
 	private Rect exit;
@@ -27,6 +28,8 @@ public class MenuScript : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		// initializes the menu entries
+		difficulty = -1;
+		Debug.Log (difficulty);
 		play = new Rect(255,340,222,50);
 		exit = new Rect(315,125,215,50);
 	}
@@ -42,33 +45,61 @@ public class MenuScript : MonoBehaviour {
 		GUI.matrix = Matrix4x4.TRS (new Vector3(0,0,0), Quaternion.identity, new Vector3 (rx, ry, 1));
 
 		// set the menu entries color
-		GUI.contentColor = new Color(1,1,1,1);
+		GUI.contentColor = new Color(0,0,0,1);
 		// build a label for the game title
 		GUIStyle myTitleStyle = new GUIStyle(GUI.skin.label);
-		myTitleStyle.fontSize = 92;
+		myTitleStyle.fontSize = 108;
 		myTitleStyle.font = myFont;
-		GUI.Label(new Rect(280,100,600,100), "Tetra  Pack", myTitleStyle);
-		GUIStyle myTitle2Style = new GUIStyle(GUI.skin.label);
-		myTitle2Style.fontSize = 48;
-		myTitle2Style.font = myFont;
-		GUI.Label(new Rect(320,200,600,100), "The Legend Returns", myTitle2Style);
+		GUI.Label(new Rect(280,100,600,100), "3D TETRIS", myTitleStyle);
+
 
 		// build a label for the menu entries
-		GUI.contentColor = new Color(1,1,1,1);
+		GUI.contentColor = new Color(0,0,0.5f,1);
 		GUIStyle myButtonStyle = new GUIStyle(GUI.skin.label);
-		myButtonStyle.fontSize = 48;
+		myButtonStyle.fontSize = 72;
 		myButtonStyle.font = myFont;
 		// check for click on entry "play game"
 		// if clicked, load the scene "game2"
-		if (GUI.Button(new Rect(280,380,600,100), "Play Game", myButtonStyle)){
+		if (GUI.Button(new Rect(220,260,600,100), "Play Game", myButtonStyle)){
 			Application.LoadLevel("game2");
 		}
-		
+
+		if (GUI.Button(new Rect(1000,260,600,100), "easy", myButtonStyle)){
+			difficulty = 1;
+			Debug.Log ("hit easy, " + difficulty);
+		}
+
+		if (GUI.Button(new Rect(1000,380,600,100), "normal", myButtonStyle)){
+			difficulty = 2;
+			Debug.Log ("hit normal, " + difficulty);
+		}
+
+		if (GUI.Button(new Rect(1000,500,600,100), "hard", myButtonStyle)){
+			difficulty = 3;
+			Debug.Log ("hit hard, " + difficulty);
+		}
+
+		if (GUI.Button(new Rect(280,380,600,100), "show high scores", myButtonStyle)){
+			Application.LoadLevel("highscore");
+		}
 		// check for click on entry "exit game"
 		// if clicked, quit the application
 		if (GUI.Button(new Rect(340,500,600,100), "Exit Game", myButtonStyle)){
 			Application.Quit();
 		}
 
+	}
+
+
+	void Awake() {
+		DontDestroyOnLoad(this);
+	}
+
+	public int getWeight() {
+		return (int)nativeWidth;
+	}
+
+	public int getDiff() {
+		return difficulty;
 	}
 }

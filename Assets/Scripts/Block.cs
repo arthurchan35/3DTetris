@@ -64,7 +64,7 @@ public class Block : MonoBehaviour {
 				{
 					blockMatrix[x,y,0] = true;
 					// if Block Bit is set, Instantiate Block 
-					block  = Instantiate(cubus,new Vector3(x-halfSizeFloat,halfSizeFloat-y,-halfSizeFloat), Quaternion.identity) as GameObject;
+					block  = Instantiate(cubus,new Vector3(x-halfSizeFloat,halfSizeFloat-y,0.5f -halfSizeFloat), Quaternion.identity) as GameObject;
 					// give color to the block
 					block.transform.GetComponentInChildren<MeshRenderer>().GetComponent<Renderer>().material = blockMaterial;
 					// bind block to parent for rotation and movement 
@@ -77,8 +77,19 @@ public class Block : MonoBehaviour {
 		xPosition = (int)(position.x - halfSizeFloat);
 		yPosition = Gamemanager.thisOne.getFieldHeight () - 1;
 		position.y = yPosition - halfSizeFloat; 
-		position.z = Gamemanager.thisOne.getFieldLength () / 2 + (size % 2 == 0 ? 0.0f : 0.5f);
-		zPosition = (int)(position.z - halfSizeFloat);
+		position.z = Gamemanager.thisOne.getFieldLength () / 2 + (size % 2 == 0 ? 0.5f : 0.0f);
+		if (size == 2)
+			zPosition = (int)(position.z - 0);
+		else
+			zPosition = (int)(position.z - 1f);
+	//	position.x = Gamemanager.thisOne.getFieldWidth () / 2;
+	//	xPosition = (int)(position.x - halfSizeFloat);
+	//	yPosition = Gamemanager.thisOne.getFieldHeight () - 1;
+	//	position.y = yPosition - halfSizeFloat; 
+	//	position.z = Gamemanager.thisOne.getFieldLength () / 2;
+	//	zPosition = (int)(position.z - halfSizeFloat);
+
+
 		transform.position = position;
 
 		// don't freeze block
@@ -172,7 +183,8 @@ public class Block : MonoBehaviour {
 		}
 
 		// drop the block
-		if (Input.GetButtonDown("Drop")) {
+	//	if (Input.GetButtonDown("Drop")) {
+		if (Input.GetKeyUp (KeyCode.Keypad5)) {
 			fallingInterval = 0f;
 			dropped = true;
 		}
@@ -241,7 +253,7 @@ public class Block : MonoBehaviour {
 		}
 	}
 
-	void rotateBlockForward() {
+	void rotateBlockBackward() {
 		// generate a temporary matrix to store the rotated block
 		bool[,,] tempMatrix = new bool[size, size, size];
 		for (int x = 0; x < size; x++) {
@@ -257,11 +269,12 @@ public class Block : MonoBehaviour {
 			// if not, copy the temp matrix to the original blockmatrix
 			System.Array.Copy(tempMatrix, blockMatrix, size * size * size);
 			// and don't forget: rotate the block on the screen
+			//transform.Rotate(new Vector3(1000, 0, 0), -90.0f, Space.World);
 			transform.Rotate(Vector3.left*+90.0f, Space.World);
 		}
 	}
 
-	void rotateBlockBackward() {
+	void rotateBlockForward() {
 		// generate a temporary matrix to store the rotated block
 		bool[,,] tempMatrix = new bool[size, size, size];
 		for (int x = 0; x < size; x++) {

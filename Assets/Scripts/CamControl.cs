@@ -14,7 +14,7 @@ public class CamControl : MonoBehaviour {
 	void Start () {
 		lookSens = 5.0f;
 		Cursor.lockState = CursorLockMode.Locked;
-		Cursor.visible = true;
+		Cursor.visible = false;
 	}
 	
 	// Update is called once per frame

@@ -1,9 +1,13 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\Gamemanager.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\MoveControl.cs">
     <Files>
-      <File FileName="Assets\Scripts\Gamemanager.cs" Line="248" Column="16" />
-      <File FileName="Assets\Scripts\Block.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Gamemanager.cs" Line="70" Column="2" />
+      <File FileName="Assets\Scripts\HighScore.cs" Line="29" Column="51" />
+      <File FileName="Assets\Scripts\UpdateHighScore.cs" Line="20" Column="41" />
+      <File FileName="Assets\Scripts\MenuScript.cs" Line="94" Column="1" />
+      <File FileName="Assets\Scripts\MoveControl.cs" Line="23" Column="44" />
+      <File FileName="Assets\Scripts\CamControl.cs" Line="16" Column="3" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
