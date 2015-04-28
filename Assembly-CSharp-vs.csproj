@@ -48,7 +48,6 @@
   <ItemGroup>
      <Compile Include="Assets\Scripts\Block.cs" />
      <Compile Include="Assets\Scripts\CamControl.cs" />
-     <Compile Include="Assets\Scripts\FSPlayer.cs" />
      <Compile Include="Assets\Scripts\Gamemanager.cs" />
      <Compile Include="Assets\Scripts\HighScore.cs" />
      <Compile Include="Assets\Scripts\LightRotater.cs" />
@@ -58,7 +57,6 @@
      <Compile Include="Assets\Scripts\MoveControl.cs" />
      <Compile Include="Assets\Scripts\SoundManager.cs" />
      <Compile Include="Assets\Scripts\UpdateHighScore.cs" />
-     <Compile Include="Assets\Scripts\rotateCameraAround.cs" />
      <Compile Include="Assets\iTween\Plugins\iTween.cs" />
      <Compile Include="Assets\iTween\Sample\MoveSample.cs" />
      <Compile Include="Assets\iTween\Sample\RotateSample.cs" />

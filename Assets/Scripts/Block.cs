@@ -1,13 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-// this script is attached to each of the active falling tetrominoes
-// which you can find in the prefabs folder.
-//
-// completely object oriented, it organizes itself and checks
-// for collisions in a bit-array (sorry unity, no collider)
-//
-// unity is only used for visual representation
 
 public class Block : MonoBehaviour {
 
@@ -35,27 +28,16 @@ public class Block : MonoBehaviour {
 	private bool dropped;
 
 
-	// here, Awake instead of Start has to be  used
-	// after instantiation from the Gamemanager class,
-	// method freeze may be called
-	// freeze uses parameters which must have been 
-	// initialized so far 
-	// used for the "next block" functionality
 
-	// Use this for initialization
 	void Awake () {
-		// get size of Block
+	
 		size = BlockStructure.Length;
 		Debug.Log("the size is: " + size);
-		// to do: 
-		// a lot of error checking
 
-		// needed for correct positioning
 		halfSize = size / 2;
 		halfSizeFloat = size * 0.5f;
 
-		// generate bitField for Collisions
-		// this time, unity is used only for visual representation
+
 		blockMatrix = new bool[size, size, size];
 		// Instantiate Block from the Blockstructure
 		for (int y = 0; y < size; y++) {
@@ -91,14 +73,11 @@ public class Block : MonoBehaviour {
 
 
 		transform.position = position;
-
-		// don't freeze block
+		
 		isFrozen = false;
-		// block hasn't been dropped
 		dropped = false;
 
-		// we just spawned a new Tetromino
-		// have we reached the top? Is the game already over?
+
 		if (Gamemanager.thisOne.checkBlock (blockMatrix, size, xPosition, yPosition, zPosition)) {
 			// this game is over
 			Gamemanager.thisOne.gameOver();
@@ -140,7 +119,6 @@ public class Block : MonoBehaviour {
 				Gamemanager.thisOne.setBlock(blockMatrix,size, xPosition, yPosition+1, zPosition,dropped);
 				// and destroy the gameObject
 				Destroy(gameObject);
-				// I almost forgot: leave the loop
 				return;
 			}
 
@@ -153,11 +131,11 @@ public class Block : MonoBehaviour {
 
 	// steer the block
 	void checkInput() {
-		// move block left
+	
 		if (Input.GetKeyUp(KeyCode.Keypad4)) {
 			moveAlongX(-1);
 		}
-		// move block right
+
 		if (Input.GetKeyUp(KeyCode.Keypad6)) {
 			moveAlongX(1);
 		}
@@ -183,7 +161,6 @@ public class Block : MonoBehaviour {
 		}
 
 		// drop the block
-	//	if (Input.GetButtonDown("Drop")) {
 		if (Input.GetKeyUp (KeyCode.Keypad5)) {
 			fallingInterval = 0f;
 			dropped = true;
@@ -210,9 +187,8 @@ public class Block : MonoBehaviour {
 			transform.position = position;
 		}
 	}
-	// rotate the block right, 90°
+
 	void rotateBlockRight() {
-		// generate a temporary matrix to store the rotated block
 		bool[,,] tempMatrix = new bool[size, size,size];
 		for (int z = 0; z < size; z++) {
 			for (int y = 0; y < size; y++) {
@@ -221,19 +197,15 @@ public class Block : MonoBehaviour {
 				}
 			}
 		}
-		// check if rotated block overlaps something
 		if (!Gamemanager.thisOne.checkBlock (tempMatrix, size, xPosition, yPosition, zPosition)) {
 			GetComponent<AudioSource>().PlayOneShot(swoosh);
-			// if not, copy the temp matrix to the original blockmatrix
 			System.Array.Copy(tempMatrix, blockMatrix, size * size * size);
-			// and don't forget: rotate the block on the screen
 			transform.Rotate(Vector3.back*+90.0f, Space.World);
 		}
 	}
 
-	// rotate the block left, 90°
 	void rotateBlockLeft() {
-		// generate a temporary matrix to store the rotated block
+
 		bool[,,] tempMatrix = new bool[size, size, size];
 		for ( int z = 0; z < size; z++){
 			for (int y = 0; y < size; y++) {
@@ -242,19 +214,15 @@ public class Block : MonoBehaviour {
 				}
 			}
 		}
-		
-		// check if rotated block overlaps something
+
 		if (!Gamemanager.thisOne.checkBlock (tempMatrix, size, xPosition, yPosition, zPosition)) {
 			GetComponent<AudioSource>().PlayOneShot(swoosh);
-			// if not, copy the temp matrix to the original blockmatrix
 			System.Array.Copy(tempMatrix, blockMatrix, size * size * size);
-			// and don't forget: rotate the block on the screen
 			transform.Rotate(Vector3.forward*+90.0f, Space.World);
 		}
 	}
 
 	void rotateBlockBackward() {
-		// generate a temporary matrix to store the rotated block
 		bool[,,] tempMatrix = new bool[size, size, size];
 		for (int x = 0; x < size; x++) {
 			for (int y = 0; y < size; y++) {
@@ -262,20 +230,15 @@ public class Block : MonoBehaviour {
 					tempMatrix[x ,(size-1)-z, (size-1)-y] = blockMatrix[x,(size-1)-y, z];
 			}
 		}
-		
-		// check if rotated block overlaps something
+
 		if (!Gamemanager.thisOne.checkBlock (tempMatrix, size, xPosition, yPosition, zPosition)) {
 			GetComponent<AudioSource>().PlayOneShot(swoosh);
-			// if not, copy the temp matrix to the original blockmatrix
 			System.Array.Copy(tempMatrix, blockMatrix, size * size * size);
-			// and don't forget: rotate the block on the screen
-			//transform.Rotate(new Vector3(1000, 0, 0), -90.0f, Space.World);
 			transform.Rotate(Vector3.left*+90.0f, Space.World);
 		}
 	}
 
 	void rotateBlockForward() {
-		// generate a temporary matrix to store the rotated block
 		bool[,,] tempMatrix = new bool[size, size, size];
 		for (int x = 0; x < size; x++) {
 			for (int y = 0; y < size; y++) {
@@ -283,15 +246,12 @@ public class Block : MonoBehaviour {
 					tempMatrix[x ,z, y] = blockMatrix[x,(size-1)-y, z];
 			}
 		}
-		
-		// check if rotated block overlaps something
+
 		if (!Gamemanager.thisOne.checkBlock (tempMatrix, size, xPosition, yPosition, zPosition)) {
 			GetComponent<AudioSource>().PlayOneShot(swoosh);
-			// if not, copy the temp matrix to the original blockmatrix
 			System.Array.Copy(tempMatrix, blockMatrix, size * size * size);
-			// and don't forget: rotate the block on the screen
 			transform.Rotate(Vector3.right*+90.0f, Space.World);
-			//transform.Rotate(Vector3.forward*+90.0f);
+
 		}
 	} 	
 

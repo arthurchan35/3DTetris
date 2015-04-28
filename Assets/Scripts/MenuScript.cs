@@ -1,22 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-// this script is attached to the emtpy gameObject "GameObject" in the menu2 scene
-// it realizes the menu behaviour
-
-// menu scene loads lots (and loads) of game elements. 
-// So please be patient if you own a slow machine
 
 public class MenuScript : MonoBehaviour {
 
 	// Reference to the blox-Font
 	public Font myFont;
 
-	// I tried to make the GUI resolution independent
-	// so, here the native resolution is set to 1024x768
-	// OnGUI resizes the GUI-elements
-	// These values have to be float,
-	// else division in method OnGUI will return null (rx, ry)
+
 	private float nativeWidth = 1280;
 	private float nativeHeight = 720;
 

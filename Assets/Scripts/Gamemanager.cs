@@ -53,11 +53,6 @@ public class Gamemanager : MonoBehaviour {
 		return fieldLength;
 	}
 
-	// I tried to make the GUI resolution independent
-	// so, here the native resolution is set to 1024x768
-	// OnGUI resizes the GUI-elements
-	// These values have to be float,
-	// else division in method OnGUI will return null (rx, ry)
 	private float nativeWidth = 1280;
 	private float nativeHeight = 720;
 
@@ -121,15 +116,13 @@ public class Gamemanager : MonoBehaviour {
 		}
 
 
-		// ground control :-)
+		// ground control
 		for (int z = 0; z < fieldLength; z++) {
 			for (int x = 0; x < fieldWidth; x++) {
 				field [x, 0, z] = true;
 			}
 		}
-
-		//let's get to it: 
-		// create the first block in the game
+		
 		spawnBlock ();
 	}
 
@@ -152,8 +145,6 @@ public class Gamemanager : MonoBehaviour {
 			// instantiate the "nextBlock"-Block
 			block = (GameObject)Instantiate (blocks [nextBlock]);
 		}
-		// ok so far. we have a current block and the next block (sneak preview)
-		// ...and set the falling speed according to the level
 		block.GetComponent<Block>().setFallingInterval(1f-0.025f*level);
 		// generate the next block
 
@@ -170,7 +161,6 @@ public class Gamemanager : MonoBehaviour {
 	}
 	
 
-	// Update is called once per frame
 	void Update () {
 		// check the game states the game may be in
 		switch (gameState) {
@@ -204,9 +194,7 @@ public class Gamemanager : MonoBehaviour {
 		}
 	}
 
-	// why the same function?
-	// we destroy the parent block and his script. This way, we give control to a function in this script
-	// before destroying the block. So this routine can run even if the block is destroyed
+
 	public void _setBlock(bool[,,] blockMatrix, int size, int xPos, int yPos, int zPos, bool dropped) {
 		// play the drop sound
 		GetComponent<AudioSource>().PlayOneShot (drop);
@@ -231,11 +219,6 @@ public class Gamemanager : MonoBehaviour {
 			spawnBlock();
 	}
 
-
-
-	// The Container-Block must be destroyed when reaching the ground or touching another
-	// brick from the top. Why not just use the current cubes for the game?
-	//  We have to test for x/y coordinates which may have be corrupted by block rotation :-/
 	public void setBlock(bool[,,] blockMatrix, int size, int xPos, int yPos, int zPos, bool dropped) {
 		_setBlock (blockMatrix, size, xPos, yPos, zPos, dropped);
 	}
@@ -394,7 +377,7 @@ public class Gamemanager : MonoBehaviour {
 		GUIStyle myTitleStyle = new GUIStyle(GUI.skin.label);
 		myTitleStyle.fontSize = 32;
 		GUI.Label(new Rect(10,10,600,100), "Score: " + score.ToString("D7"), myTitleStyle);
-		GUI.Label(new Rect(10,50,600,100), "Lines: " + linesCleared.ToString("D7"), myTitleStyle);
+		GUI.Label(new Rect(10,50,600,100), "Layers: " + linesCleared.ToString("D7"), myTitleStyle);
 		GUI.Label(new Rect(10,90,600,100), "Level: " + level.ToString("D3"), myTitleStyle);
 		GUI.Label(new Rect(10,130,600,100), "Next: ", myTitleStyle);
 
